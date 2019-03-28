@@ -5,12 +5,51 @@ Werkzeug Documentation:  http://werkzeug.pocoo.org/documentation/
 This file creates your application.
 """
 
+import os
+from .forms import UploadForm
 from app import app
-from flask import render_template, request
+from flask import render_template, request, redirect, url_for, flash, jsonify
+from werkzeug.utils import secure_filename
 
 ###
 # Routing for your application.
 ###
+@app.route('/api/upload', methods=['POST'])
+def upload():
+    # Instantiate your form class
+    form = UploadForm()
+    # Validate profile upload on submit
+    if request.method == 'POST' and form.validate_on_submit():
+        
+        description = form.description.data
+        photo = form.upload.data # we could also use request.files['photo']
+        
+        filename = secure_filename(photo.filename)
+        #filename = userid+".png"
+        photo.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        flash('File Saved', 'success')
+        
+        info = [{
+         "message": "File Upload Successful",
+         "filename": "you-uploaded-file.jpg",
+         "description": "Some description for your image"
+        }]
+        
+        error = form_errors(form)
+        
+        return jsonify({
+         "message": "File Upload Successful",
+         "filename": "you-uploaded-"+filename+".jpg",
+         "description": description,
+         "error(s)": error
+        })
+
+    return render_template('upload.html', form=form)
+    
+    
+
+
+
 
 
 # Please create all new routes and view functions above this route.
