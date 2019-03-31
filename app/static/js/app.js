@@ -12,6 +12,9 @@ Vue.component('app-header', {
           <li class="nav-item active">
             <router-link class="nav-link" to="/">Home <span class="sr-only">(current)</span></router-link>
           </li>
+          <li class="nav-item">
+            <router-link class="nav-link" to="/upload">Upload</router-link>
+          </li>
         </ul>
       </div>
     </nav>
@@ -27,6 +30,52 @@ Vue.component('app-footer', {
     </footer>
     `
 });
+
+
+
+const uppload = Vue.component('upload-form', {
+    template: `
+    <form id="upload-Form" action="{{ url_for('upload') }}" method="post" @submit.prevent="uploadPhoto" enctype="multipart/form-data">
+    
+      {{ form.csrf_token }}
+      
+      <div class="form-group">
+        {{ form.description.label }}
+        {{ form.description(class="form-control") }}
+      </div>
+      <div class="form-group">
+        {{ form.upload.label }}
+        {{ form.upload(class="form-control") }}
+      </div>
+      
+      <button type="submit" name="submit" class="btn btn-primary">Upload file</button>
+    </form>
+    </div>
+    `,
+    methods: {
+      	uploadPhoto: function() {
+        	let uploadForm = document.getElementById('uploadForm');
+            let form_data = new FormData(uploadForm); 
+        	fetch("/api/upload", {
+        	    method: 'POST', 
+        	    body: form_data,
+        	    headers: {'X-CSRFToken': token},
+        	    credentials: 'same-origin'
+        	}).then(function (response) {
+        	    return response.json();
+             }).then(function (jsonResponse) {
+                 console.log(jsonResponse);
+             }).catch(function (error) {
+                 console.log(error);
+             })
+        }
+    }
+});
+
+
+
+
+
 
 const Home = Vue.component('home', {
    template: `
@@ -57,7 +106,8 @@ const router = new VueRouter({
     routes: [
         {path: "/", component: Home},
         // Put other routes here
-
+        {path: "/upload/", component: uppload},
+        
         // This is a catch all route in case none of the above matches
         {path: "*", component: NotFound}
     ]

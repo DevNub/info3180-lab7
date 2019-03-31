@@ -44,7 +44,10 @@ def upload():
          "error(s)": error
         })
 
-    return render_template('upload.html', form=form)
+    return jsonify({
+         "message": "Action Unsuccessful",
+         "error(s)": error
+        })
     
     
 
